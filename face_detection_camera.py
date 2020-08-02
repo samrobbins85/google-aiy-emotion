@@ -1,25 +1,3 @@
-#!/usr/bin/env python3
-# Copyright 2017 Google Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-"""Camera inference face detection demo code.
-
-Runs continuous face detection on the VisionBonnet and prints the number of
-detected faces.
-
-Example:
-face_detection_camera.py --num_frames 10
-"""
 import argparse
 
 from picamera import PiCamera
@@ -41,7 +19,6 @@ def avg_joy_score(faces):
 def main():
     env = Env()
     env.read_env()
-    """Face detection camera inference example."""
     parser = argparse.ArgumentParser()
     parser.add_argument('--num_frames', '-n', type=int, dest='num_frames', default=None,
                         help='Sets the number of frames to run for, otherwise runs forever.')
