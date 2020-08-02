@@ -34,11 +34,12 @@ def avg_joy_score(faces):
         return sum(face.joy_score for face in faces) / len(faces)
     return 0.0
 
+
 def main():
     """Face detection camera inference example."""
     parser = argparse.ArgumentParser()
     parser.add_argument('--num_frames', '-n', type=int, dest='num_frames', default=None,
-        help='Sets the number of frames to run for, otherwise runs forever.')
+                        help='Sets the number of frames to run for, otherwise runs forever.')
     args = parser.parse_args()
 
     # Forced sensor mode, 1640x1232, full FoV. See:
@@ -60,6 +61,7 @@ def main():
             return (scale_x * x, scale_y * y, scale_x * (x + width),
                     scale_y * (y + height))
 
+        joy_counter = 0
         with CameraInference(face_detection.model()) as inference:
             for result in inference.run(args.num_frames):
                 faces = face_detection.get_faces(result)
@@ -67,9 +69,28 @@ def main():
                 for face in faces:
                     annotator.bounding_box(transform(face.bounding_box), fill=0)
                 annotator.update()
+                if len(faces) > 0:
+                    if avg_joy_score(faces) > 0.8:
+                        if joy_counter < 0:
+                            joy_counter = 0
+                        else:
+                            joy_counter += 1
 
-                print('#%05d (%5.2f fps): num_faces=%d, avg_joy_score=%.2f' %
-                    (inference.count, inference.rate, len(faces), avg_joy_score(faces)))
+                    if avg_joy_score(faces) < 0.1:
+                        if joy_counter > 0:
+                            joy_counter = 0
+                        else:
+                            joy_counter -= 1
+                    if joy_counter > 20:
+                        print("Happy")
+                        joy_counter = 0
+                    if joy_counter < -20:
+                        print("Sad")
+                        joy_counter = 0
+                else:
+                    joy_counter = 0
+                    # print('#%05d (%5.2f fps): num_faces=%d, avg_joy_score=%.2f' %
+                #     (inference.count, inference.rate, len(faces), avg_joy_score(faces)))
 
         camera.stop_preview()
 
