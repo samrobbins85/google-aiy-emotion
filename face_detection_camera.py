@@ -31,6 +31,7 @@ import os
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from environs import Env
+import urllib.request, json
 def avg_joy_score(faces):
     if faces:
         return sum(face.joy_score for face in faces) / len(faces)
@@ -87,11 +88,18 @@ def main():
                             joy_counter -= 1
                     if joy_counter > 20:
                         print("Happy")
+
+
+                        joy_counter = 0
+                    if joy_counter < -20:
+                        print("Sad")
+                        request_url = urllib.request.urlopen("https://www.reddit.com/r/dogpictures/random.json")
+                        result = json.loads(request_url.read().decode())[0]["data"]["children"][0]["data"]["url"]
                         message = Mail(
                             from_email='contact@samrobbins.uk',
                             to_emails='samrobbinsgb@gmail.com',
                             subject='Sending with Twilio SendGrid is Fun',
-                            html_content='<strong>and easy to do anywhere, even with Python</strong>')
+                            html_content='<img src='+result+'>')
                         try:
                             sg = SendGridAPIClient(env.str('SENDGRID_API_KEY'))
                             response = sg.send(message)
@@ -100,10 +108,6 @@ def main():
                             # print(response.headers)
                         except Exception as e:
                             print(e.message)
-
-                        joy_counter = 0
-                    if joy_counter < -20:
-                        print("Sad")
                         joy_counter = 0
                 else:
                     joy_counter = 0
