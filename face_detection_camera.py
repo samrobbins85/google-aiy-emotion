@@ -27,8 +27,10 @@ from picamera import PiCamera
 from aiy.vision.inference import CameraInference
 from aiy.vision.models import face_detection
 from aiy.vision.annotator import Annotator
-
-
+import os
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+from environs import Env
 def avg_joy_score(faces):
     if faces:
         return sum(face.joy_score for face in faces) / len(faces)
@@ -36,6 +38,8 @@ def avg_joy_score(faces):
 
 
 def main():
+    env = Env()
+    env.read_env()
     """Face detection camera inference example."""
     parser = argparse.ArgumentParser()
     parser.add_argument('--num_frames', '-n', type=int, dest='num_frames', default=None,
@@ -83,6 +87,20 @@ def main():
                             joy_counter -= 1
                     if joy_counter > 20:
                         print("Happy")
+                        message = Mail(
+                            from_email='contact@samrobbins.uk',
+                            to_emails='samrobbinsgb@gmail.com',
+                            subject='Sending with Twilio SendGrid is Fun',
+                            html_content='<strong>and easy to do anywhere, even with Python</strong>')
+                        try:
+                            sg = SendGridAPIClient(env.str('SENDGRID_API_KEY'))
+                            response = sg.send(message)
+                            print(response.status_code)
+                            # print(response.body)
+                            # print(response.headers)
+                        except Exception as e:
+                            print(e.message)
+
                         joy_counter = 0
                     if joy_counter < -20:
                         print("Sad")
